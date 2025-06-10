@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,40 +45,47 @@ export const useDatabase = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const channelsRef = useRef<any[]>([]);
 
   useEffect(() => {
     fetchAllData();
     
-    // Subscribe to changes with proper cleanup
-    const playersChannel = supabase
-      .channel('players-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'players' },
-        () => fetchPlayers()
-      )
-      .subscribe();
+    // Only create subscriptions if they don't already exist
+    if (channelsRef.current.length === 0) {
+      const playersChannel = supabase
+        .channel('players-realtime-' + Date.now())
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'players' },
+          () => fetchPlayers()
+        )
+        .subscribe();
 
-    const gamesChannel = supabase
-      .channel('games-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'games' },
-        () => fetchGames()
-      )
-      .subscribe();
+      const gamesChannel = supabase
+        .channel('games-realtime-' + Date.now())
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'games' },
+          () => fetchGames()
+        )
+        .subscribe();
 
-    const newsChannel = supabase
-      .channel('news-realtime')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'news' },
-        () => fetchNews()
-      )
-      .subscribe();
+      const newsChannel = supabase
+        .channel('news-realtime-' + Date.now())
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'news' },
+          () => fetchNews()
+        )
+        .subscribe();
+
+      // Store channel references
+      channelsRef.current = [playersChannel, gamesChannel, newsChannel];
+    }
 
     // Cleanup function
     return () => {
-      supabase.removeChannel(playersChannel);
-      supabase.removeChannel(gamesChannel);
-      supabase.removeChannel(newsChannel);
+      channelsRef.current.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+      channelsRef.current = [];
     };
   }, []); // Empty dependency array to run only once
 
