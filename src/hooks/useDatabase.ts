@@ -48,8 +48,39 @@ export const useDatabase = () => {
 
   useEffect(() => {
     fetchAllData();
-    subscribeToChanges();
-  }, []);
+    
+    // Subscribe to changes with proper cleanup
+    const playersChannel = supabase
+      .channel('players-realtime')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'players' },
+        () => fetchPlayers()
+      )
+      .subscribe();
+
+    const gamesChannel = supabase
+      .channel('games-realtime')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'games' },
+        () => fetchGames()
+      )
+      .subscribe();
+
+    const newsChannel = supabase
+      .channel('news-realtime')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'news' },
+        () => fetchNews()
+      )
+      .subscribe();
+
+    // Cleanup function
+    return () => {
+      supabase.removeChannel(playersChannel);
+      supabase.removeChannel(gamesChannel);
+      supabase.removeChannel(newsChannel);
+    };
+  }, []); // Empty dependency array to run only once
 
   const fetchAllData = async () => {
     try {
@@ -121,38 +152,6 @@ export const useDatabase = () => {
     }));
     
     setNews(typedNews);
-  };
-
-  const subscribeToChanges = () => {
-    const playersChannel = supabase
-      .channel('players-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'players' },
-        () => fetchPlayers()
-      )
-      .subscribe();
-
-    const gamesChannel = supabase
-      .channel('games-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'games' },
-        () => fetchGames()
-      )
-      .subscribe();
-
-    const newsChannel = supabase
-      .channel('news-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'news' },
-        () => fetchNews()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(playersChannel);
-      supabase.removeChannel(gamesChannel);
-      supabase.removeChannel(newsChannel);
-    };
   };
 
   const addPlayer = async (playerData: Omit<Player, 'id' | 'goals' | 'assists' | 'yellow_cards' | 'red_cards' | 'motm_awards' | 'matches_played'>) => {
