@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,23 +6,20 @@ import { Users, Calendar, Trophy } from "lucide-react";
 import PlayersManager from "@/components/PlayersManager";
 import GamesManager from "@/components/GamesManager";
 import NewsManager from "@/components/NewsManager";
-
 const AdminDashboard = () => {
-  const { stats, loading } = useDatabase();
-
+  const {
+    stats,
+    loading
+  } = useDatabase();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+    return <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
@@ -32,7 +28,7 @@ const AdminDashboard = () => {
               <Trophy className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Thunder FC Admin</h1>
+              <h1 className="text-2xl font-bold text-gray-900">GG Masters FC Admin</h1>
               <p className="text-sm text-gray-600">Team Management Dashboard</p>
             </div>
           </div>
@@ -101,8 +97,6 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdminDashboard;
