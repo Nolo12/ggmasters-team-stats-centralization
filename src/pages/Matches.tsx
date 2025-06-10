@@ -51,7 +51,7 @@ const Matches = () => {
                     venue: match.venue || "TBD",
                     homeScore: match.home_score || undefined,
                     awayScore: match.away_score || undefined,
-                    status: match.status,
+                    status: match.status === "cancelled" ? "cancelled" : match.status,
                     isHome: match.is_home,
                     motm: match.players?.name
                   }} 
@@ -76,7 +76,7 @@ const Matches = () => {
                     venue: match.venue || "TBD",
                     homeScore: match.home_score || undefined,
                     awayScore: match.away_score || undefined,
-                    status: match.status,
+                    status: match.status === "cancelled" ? "cancelled" : match.status,
                     isHome: match.is_home,
                     motm: match.players?.name
                   }} 

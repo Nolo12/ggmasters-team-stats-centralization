@@ -93,7 +93,14 @@ export const useDatabase = () => {
       console.error("Error fetching games:", error);
       return;
     }
-    setGames(data || []);
+    
+    // Type-safe transformation
+    const typedGames: Game[] = (data || []).map(game => ({
+      ...game,
+      status: game.status as "upcoming" | "completed" | "cancelled"
+    }));
+    
+    setGames(typedGames);
   };
 
   const fetchNews = async () => {
@@ -106,7 +113,14 @@ export const useDatabase = () => {
       console.error("Error fetching news:", error);
       return;
     }
-    setNews(data || []);
+    
+    // Type-safe transformation
+    const typedNews: NewsArticle[] = (data || []).map(article => ({
+      ...article,
+      category: article.category as "match-result" | "player-news" | "team-update"
+    }));
+    
+    setNews(typedNews);
   };
 
   const subscribeToChanges = () => {

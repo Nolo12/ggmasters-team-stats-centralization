@@ -10,7 +10,7 @@ interface Match {
   venue: string;
   homeScore?: number;
   awayScore?: number;
-  status: "completed" | "upcoming" | "live";
+  status: "completed" | "upcoming" | "cancelled";
   isHome: boolean;
   motm?: string;
 }
@@ -24,7 +24,7 @@ const MatchCard = ({ match }: MatchCardProps) => {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800";
-      case "live":
+      case "cancelled":
         return "bg-red-100 text-red-800";
       case "upcoming":
         return "bg-blue-100 text-blue-800";

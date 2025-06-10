@@ -19,6 +19,7 @@ interface GameFormData {
   home_score: number | null;
   away_score: number | null;
   status: "upcoming" | "completed" | "cancelled";
+  motm_player_id: string | null;
 }
 
 const GamesManager = () => {
@@ -35,6 +36,7 @@ const GamesManager = () => {
       home_score: null,
       away_score: null,
       status: "upcoming",
+      motm_player_id: null,
     },
   });
 
@@ -47,6 +49,7 @@ const GamesManager = () => {
       home_score: null,
       away_score: null,
       status: "upcoming",
+      motm_player_id: null,
     },
   });
 
@@ -77,6 +80,7 @@ const GamesManager = () => {
     editForm.setValue("home_score", game.home_score);
     editForm.setValue("away_score", game.away_score);
     editForm.setValue("status", game.status);
+    editForm.setValue("motm_player_id", game.motm_player_id);
   };
 
   const getStatusColor = (status: string) => {
