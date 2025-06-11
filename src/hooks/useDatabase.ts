@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -39,10 +38,30 @@ interface NewsArticle {
   published_at: string;
 }
 
+interface TeamStatistics {
+  id: string;
+  matches_played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+}
+
+interface TeamBranding {
+  id: string;
+  logo_url: string | null;
+  team_name: string;
+}
+
 export const useDatabase = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [news, setNews] = useState<NewsArticle[]>([]);
+  const [teamStats, setTeamStats] = useState<TeamStatistics | null>(null);
+  const [teamBranding, setTeamBranding] = useState<TeamBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const channelsRef = useRef<any[]>([]);
@@ -64,7 +83,10 @@ export const useDatabase = () => {
         .channel('games-realtime-' + Date.now())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'games' },
-          () => fetchGames()
+          () => {
+            fetchGames();
+            fetchTeamStats();
+          }
         )
         .subscribe();
 
@@ -76,8 +98,24 @@ export const useDatabase = () => {
         )
         .subscribe();
 
+      const teamStatsChannel = supabase
+        .channel('team-stats-realtime-' + Date.now())
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'team_statistics' },
+          () => fetchTeamStats()
+        )
+        .subscribe();
+
+      const brandingChannel = supabase
+        .channel('branding-realtime-' + Date.now())
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'team_branding' },
+          () => fetchTeamBranding()
+        )
+        .subscribe();
+
       // Store channel references
-      channelsRef.current = [playersChannel, gamesChannel, newsChannel];
+      channelsRef.current = [playersChannel, gamesChannel, newsChannel, teamStatsChannel, brandingChannel];
     }
 
     // Cleanup function
@@ -92,7 +130,13 @@ export const useDatabase = () => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      await Promise.all([fetchPlayers(), fetchGames(), fetchNews()]);
+      await Promise.all([
+        fetchPlayers(), 
+        fetchGames(), 
+        fetchNews(), 
+        fetchTeamStats(), 
+        fetchTeamBranding()
+      ]);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
@@ -132,7 +176,6 @@ export const useDatabase = () => {
       return;
     }
     
-    // Type-safe transformation
     const typedGames: Game[] = (data || []).map(game => ({
       ...game,
       status: game.status as "upcoming" | "completed" | "cancelled"
@@ -152,13 +195,42 @@ export const useDatabase = () => {
       return;
     }
     
-    // Type-safe transformation
     const typedNews: NewsArticle[] = (data || []).map(article => ({
       ...article,
       category: article.category as "match-result" | "player-news" | "team-update"
     }));
     
     setNews(typedNews);
+  };
+
+  const fetchTeamStats = async () => {
+    const { data, error } = await supabase
+      .from('team_statistics')
+      .select('*')
+      .limit(1)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching team stats:", error);
+      return;
+    }
+    
+    setTeamStats(data);
+  };
+
+  const fetchTeamBranding = async () => {
+    const { data, error } = await supabase
+      .from('team_branding')
+      .select('*')
+      .limit(1)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching team branding:", error);
+      return;
+    }
+    
+    setTeamBranding(data);
   };
 
   const addPlayer = async (playerData: Omit<Player, 'id' | 'goals' | 'assists' | 'yellow_cards' | 'red_cards' | 'motm_awards' | 'matches_played'>) => {
@@ -268,22 +340,67 @@ export const useDatabase = () => {
     return true;
   };
 
+  const uploadTeamLogo = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `logo.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('team_logos')
+      .upload(fileName, file, { upsert: true });
+    
+    if (uploadError) {
+      toast({
+        title: "Error",
+        description: "Failed to upload logo",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    const { data } = supabase.storage
+      .from('team_logos')
+      .getPublicUrl(fileName);
+    
+    const { error: updateError } = await supabase
+      .from('team_branding')
+      .update({ logo_url: data.publicUrl })
+      .eq('id', teamBranding?.id);
+    
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: "Failed to update logo URL",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    toast({
+      title: "Success",
+      description: "Team logo updated successfully",
+    });
+    return true;
+  };
+
   const stats = {
-    totalMatches: games.length,
-    wins: games.filter(g => {
-      if (g.status !== "completed" || g.home_score === null || g.away_score === null) return false;
-      const ourScore = g.is_home ? g.home_score : g.away_score;
-      const theirScore = g.is_home ? g.away_score : g.home_score;
-      return ourScore > theirScore;
-    }).length,
-    totalGoals: players.reduce((sum, player) => sum + player.goals, 0),
-    totalPlayers: players.length
+    totalMatches: teamStats?.matches_played || 0,
+    wins: teamStats?.wins || 0,
+    draws: teamStats?.draws || 0,
+    losses: teamStats?.losses || 0,
+    totalGoals: teamStats?.goals_for || 0,
+    totalPlayers: players.length,
+    goalsFor: teamStats?.goals_for || 0,
+    goalsAgainst: teamStats?.goals_against || 0,
+    goalDifference: teamStats?.goal_difference || 0,
+    points: teamStats?.points || 0
   };
 
   return {
     players,
     games,
     news,
+    teamStats,
+    teamBranding,
     stats,
     loading,
     addPlayer,
@@ -291,6 +408,7 @@ export const useDatabase = () => {
     addGame,
     updateGame,
     addNews,
+    uploadTeamLogo,
     refetch: fetchAllData
   };
 };

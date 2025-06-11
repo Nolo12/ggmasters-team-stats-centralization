@@ -224,6 +224,69 @@ export type Database = {
         }
         Relationships: []
       }
+      team_branding: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          team_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          team_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          team_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      team_statistics: {
+        Row: {
+          draws: number | null
+          goal_difference: number | null
+          goals_against: number | null
+          goals_for: number | null
+          id: string
+          losses: number | null
+          matches_played: number | null
+          points: number | null
+          updated_at: string | null
+          wins: number | null
+        }
+        Insert: {
+          draws?: number | null
+          goal_difference?: number | null
+          goals_against?: number | null
+          goals_for?: number | null
+          id?: string
+          losses?: number | null
+          matches_played?: number | null
+          points?: number | null
+          updated_at?: string | null
+          wins?: number | null
+        }
+        Update: {
+          draws?: number | null
+          goal_difference?: number | null
+          goals_against?: number | null
+          goals_for?: number | null
+          id?: string
+          losses?: number | null
+          matches_played?: number | null
+          points?: number | null
+          updated_at?: string | null
+          wins?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
