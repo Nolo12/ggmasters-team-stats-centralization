@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,14 +66,15 @@ export const useDatabase = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const channelsRef = useRef<any[]>([]);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
     fetchAllData();
     
     // Only create subscriptions if they don't already exist
-    if (channelsRef.current.length === 0) {
+    if (!isSubscribedRef.current) {
       const playersChannel = supabase
-        .channel('players-realtime-' + Date.now())
+        .channel('players-realtime-' + Math.random())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'players' },
           () => fetchPlayers()
@@ -80,7 +82,7 @@ export const useDatabase = () => {
         .subscribe();
 
       const gamesChannel = supabase
-        .channel('games-realtime-' + Date.now())
+        .channel('games-realtime-' + Math.random())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'games' },
           () => {
@@ -91,7 +93,7 @@ export const useDatabase = () => {
         .subscribe();
 
       const newsChannel = supabase
-        .channel('news-realtime-' + Date.now())
+        .channel('news-realtime-' + Math.random())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'news' },
           () => fetchNews()
@@ -99,7 +101,7 @@ export const useDatabase = () => {
         .subscribe();
 
       const teamStatsChannel = supabase
-        .channel('team-stats-realtime-' + Date.now())
+        .channel('team-stats-realtime-' + Math.random())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'team_statistics' },
           () => fetchTeamStats()
@@ -107,7 +109,7 @@ export const useDatabase = () => {
         .subscribe();
 
       const brandingChannel = supabase
-        .channel('branding-realtime-' + Date.now())
+        .channel('branding-realtime-' + Math.random())
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'team_branding' },
           () => fetchTeamBranding()
@@ -116,14 +118,18 @@ export const useDatabase = () => {
 
       // Store channel references
       channelsRef.current = [playersChannel, gamesChannel, newsChannel, teamStatsChannel, brandingChannel];
+      isSubscribedRef.current = true;
     }
 
     // Cleanup function
     return () => {
-      channelsRef.current.forEach(channel => {
-        supabase.removeChannel(channel);
-      });
-      channelsRef.current = [];
+      if (channelsRef.current.length > 0) {
+        channelsRef.current.forEach(channel => {
+          supabase.removeChannel(channel);
+        });
+        channelsRef.current = [];
+        isSubscribedRef.current = false;
+      }
     };
   }, []); // Empty dependency array to run only once
 
