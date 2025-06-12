@@ -1,29 +1,34 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
 interface AdminLoginProps {
   onLogin: () => void;
 }
-const AdminLogin = ({
-  onLogin
-}: AdminLoginProps) => {
+
+const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     // Simple credential check
     if (email === "msixty@ggmasters.com" && password === "password@123") {
+      // Store session indicator
+      localStorage.setItem('adminSession', 'true');
+      
       toast({
         title: "Login Successful",
         description: "Welcome to the admin panel!"
@@ -38,7 +43,23 @@ const AdminLogin = ({
     }
     setLoading(false);
   };
-  return <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      {/* Back to Home Button */}
+      <Button
+        onClick={handleBackToHome}
+        variant="ghost"
+        className="absolute top-4 left-4 flex items-center gap-2 text-white hover:text-gray-300 hover:bg-gray-800"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Button>
+
       <Card className="w-full max-w-md bg-gray-800/80 border-gray-700">
         <CardHeader className="text-center">
           <div className="mx-auto w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center mb-4">
@@ -69,6 +90,8 @@ const AdminLogin = ({
           
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default AdminLogin;

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
@@ -97,7 +96,7 @@ const Players = () => {
             variant={sortBy === 'default' ? 'default' : 'outline'}
             className={`flex items-center gap-2 ${
               sortBy === 'default' 
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' 
+                ? 'bg-white text-black hover:bg-gray-200' 
                 : 'border-gray-600 text-gray-300 hover:bg-gray-700'
             }`}
           >
@@ -109,7 +108,7 @@ const Players = () => {
             variant={sortBy === 'goals' ? 'default' : 'outline'}
             className={`flex items-center gap-2 ${
               sortBy === 'goals' 
-                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
+                ? 'bg-white text-black hover:bg-gray-200' 
                 : 'border-gray-600 text-gray-300 hover:bg-gray-700'
             }`}
           >
@@ -120,7 +119,7 @@ const Players = () => {
             variant={sortBy === 'motm' ? 'default' : 'outline'}
             className={`flex items-center gap-2 ${
               sortBy === 'motm' 
-                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white' 
+                ? 'bg-white text-black hover:bg-gray-200' 
                 : 'border-gray-600 text-gray-300 hover:bg-gray-700'
             }`}
           >
@@ -131,7 +130,7 @@ const Players = () => {
             variant={sortBy === 'disciplinary' ? 'default' : 'outline'}
             className={`flex items-center gap-2 ${
               sortBy === 'disciplinary' 
-                ? 'bg-gradient-to-r from-red-500 to-orange-600 text-white' 
+                ? 'bg-white text-black hover:bg-gray-200' 
                 : 'border-gray-600 text-gray-300 hover:bg-gray-700'
             }`}
           >
@@ -140,6 +139,7 @@ const Players = () => {
           </Button>
         </div>
 
+        {/* Player Cards */}
         {sortedPlayers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {sortedPlayers.map((player, index) => (

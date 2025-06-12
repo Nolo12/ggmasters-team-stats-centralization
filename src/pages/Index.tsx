@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { useDatabase } from "@/hooks/useDatabase";
@@ -101,8 +100,7 @@ const Index = () => {
           {/* Admin Login Button */}
           <Button
             onClick={() => setShowAdminLogin(true)}
-            variant="outline"
-            className="mb-8 border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="mb-8 bg-white text-black hover:bg-gray-200"
           >
             Admin Login
           </Button>
@@ -192,8 +190,7 @@ const Index = () => {
                     ))}
                     <Button
                       onClick={() => navigate('/players?filter=goals')}
-                      variant="outline"
-                      className="w-full mt-4 border-gray-600 text-gray-300 hover:bg-gray-700"
+                      className="w-full mt-4 bg-white text-black hover:bg-gray-200"
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View All
@@ -240,8 +237,7 @@ const Index = () => {
                     ))}
                     <Button
                       onClick={() => navigate('/players?filter=motm')}
-                      variant="outline"
-                      className="w-full mt-4 border-gray-600 text-gray-300 hover:bg-gray-700"
+                      className="w-full mt-4 bg-white text-black hover:bg-gray-200"
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View All
@@ -288,8 +284,7 @@ const Index = () => {
                     ))}
                     <Button
                       onClick={() => navigate('/players?filter=disciplinary')}
-                      variant="outline"
-                      className="w-full mt-4 border-gray-600 text-gray-300 hover:bg-gray-700"
+                      className="w-full mt-4 bg-white text-black hover:bg-gray-200"
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View All Cards

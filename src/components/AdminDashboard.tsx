@@ -1,9 +1,12 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useDatabase } from "@/hooks/useDatabase";
-import { Users, Calendar, Trophy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Users, Calendar, Trophy, LogOut } from "lucide-react";
 import PlayersManager from "@/components/PlayersManager";
 import GamesManager from "@/components/GamesManager";
 import NewsManager from "@/components/NewsManager";
@@ -11,6 +14,20 @@ import TeamBrandingManager from "@/components/TeamBrandingManager";
 
 const AdminDashboard = () => {
   const { stats, loading } = useDatabase();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    // Clear any session data (if using localStorage)
+    localStorage.removeItem('adminSession');
+    
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of the admin panel.",
+    });
+    
+    navigate('/');
+  };
 
   if (loading) {
     return (
@@ -28,14 +45,24 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <Trophy className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">GG Masters FC Admin</h1>
+                <p className="text-sm text-gray-600">Team Management Dashboard</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">GG Masters FC Admin</h1>
-              <p className="text-sm text-gray-600">Team Management Dashboard</p>
-            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2 bg-white text-black border-gray-300 hover:bg-gray-200"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>

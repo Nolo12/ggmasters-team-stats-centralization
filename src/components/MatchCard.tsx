@@ -73,7 +73,7 @@ const MatchCard = ({ match }: MatchCardProps) => {
       <CardContent>
         <div className="text-center mb-4">
           <div className="text-lg font-semibold text-gray-900 mb-2">
-            {match.isHome ? "Thunder FC" : match.opponent} vs {match.isHome ? match.opponent : "Thunder FC"}
+            {match.isHome ? "GG Masters FC" : match.opponent} vs {match.isHome ? match.opponent : "GG Masters FC"}
           </div>
           {match.status === "completed" && match.homeScore !== undefined && match.awayScore !== undefined && (
             <div className="text-3xl font-bold text-blue-600 mb-2">
