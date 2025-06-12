@@ -22,13 +22,13 @@ const NewsCard = ({ article }: NewsCardProps) => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "match-result":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500/20 text-green-400 border-green-500/30";
       case "player-news":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
       case "team-update":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
   };
 
@@ -46,22 +46,22 @@ const NewsCard = ({ article }: NewsCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <Card className="bg-gray-800/80 border-gray-700 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 hover:-translate-y-1">
       <CardHeader>
         <div className="flex items-center justify-between mb-2">
           <Badge className={getCategoryColor(article.category)}>
             {getCategoryLabel(article.category)}
           </Badge>
           {article.featured && (
-            <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Featured</Badge>
           )}
         </div>
-        <CardTitle className="text-xl text-gray-900 line-clamp-2">
+        <CardTitle className="text-xl text-gray-100 line-clamp-2">
           {article.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-gray-600 mb-4 line-clamp-3">{article.excerpt}</p>
+        <p className="text-gray-300 mb-4 line-clamp-3">{article.excerpt}</p>
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4" />
