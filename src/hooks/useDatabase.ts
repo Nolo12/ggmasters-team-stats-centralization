@@ -71,7 +71,6 @@ export const useDatabase = () => {
   useEffect(() => {
     fetchAllData();
     
-    // Only create subscriptions if they don't already exist
     if (!isSubscribedRef.current) {
       const playersChannel = supabase
         .channel('players-realtime-' + Math.random())
@@ -116,12 +115,10 @@ export const useDatabase = () => {
         )
         .subscribe();
 
-      // Store channel references
       channelsRef.current = [playersChannel, gamesChannel, newsChannel, teamStatsChannel, brandingChannel];
       isSubscribedRef.current = true;
     }
 
-    // Cleanup function
     return () => {
       if (channelsRef.current.length > 0) {
         channelsRef.current.forEach(channel => {
@@ -131,7 +128,7 @@ export const useDatabase = () => {
         isSubscribedRef.current = false;
       }
     };
-  }, []); // Empty dependency array to run only once
+  }, []);
 
   const fetchAllData = async () => {
     try {
@@ -147,7 +144,7 @@ export const useDatabase = () => {
       console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: "Failed to load data",
+        description: "Failed to load data. Please refresh the page.",
         variant: "destructive",
       });
     } finally {
@@ -156,95 +153,122 @@ export const useDatabase = () => {
   };
 
   const fetchPlayers = async () => {
-    const { data, error } = await supabase
-      .from('players')
-      .select('*')
-      .order('goals', { ascending: false });
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .order('goals', { ascending: false });
+      
+      if (error) throw error;
+      setPlayers(data || []);
+    } catch (error) {
       console.error("Error fetching players:", error);
-      return;
+      toast({
+        title: "Error",
+        description: "Failed to fetch players",
+        variant: "destructive",
+      });
     }
-    setPlayers(data || []);
   };
 
   const fetchGames = async () => {
-    const { data, error } = await supabase
-      .from('games')
-      .select(`
-        *,
-        players:motm_player_id(name)
-      `)
-      .order('date', { ascending: false });
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('games')
+        .select(`
+          *,
+          players:motm_player_id(name)
+        `)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      
+      const typedGames: Game[] = (data || []).map(game => ({
+        ...game,
+        status: game.status as "upcoming" | "completed" | "cancelled"
+      }));
+      
+      setGames(typedGames);
+    } catch (error) {
       console.error("Error fetching games:", error);
-      return;
+      toast({
+        title: "Error",
+        description: "Failed to fetch games",
+        variant: "destructive",
+      });
     }
-    
-    const typedGames: Game[] = (data || []).map(game => ({
-      ...game,
-      status: game.status as "upcoming" | "completed" | "cancelled"
-    }));
-    
-    setGames(typedGames);
   };
 
   const fetchNews = async () => {
-    const { data, error } = await supabase
-      .from('news')
-      .select('*')
-      .order('published_at', { ascending: false });
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('published_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const typedNews: NewsArticle[] = (data || []).map(article => ({
+        ...article,
+        category: article.category as "match-result" | "player-news" | "team-update"
+      }));
+      
+      setNews(typedNews);
+    } catch (error) {
       console.error("Error fetching news:", error);
-      return;
+      toast({
+        title: "Error",
+        description: "Failed to fetch news",
+        variant: "destructive",
+      });
     }
-    
-    const typedNews: NewsArticle[] = (data || []).map(article => ({
-      ...article,
-      category: article.category as "match-result" | "player-news" | "team-update"
-    }));
-    
-    setNews(typedNews);
   };
 
   const fetchTeamStats = async () => {
-    const { data, error } = await supabase
-      .from('team_statistics')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('team_statistics')
+        .select('*')
+        .limit(1)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      setTeamStats(data);
+    } catch (error) {
       console.error("Error fetching team stats:", error);
-      return;
     }
-    
-    setTeamStats(data);
   };
 
   const fetchTeamBranding = async () => {
-    const { data, error } = await supabase
-      .from('team_branding')
-      .select('*')
-      .limit(1)
-      .single();
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase
+        .from('team_branding')
+        .select('*')
+        .limit(1)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      setTeamBranding(data);
+    } catch (error) {
       console.error("Error fetching team branding:", error);
-      return;
     }
-    
-    setTeamBranding(data);
   };
 
   const addPlayer = async (playerData: Omit<Player, 'id' | 'goals' | 'assists' | 'yellow_cards' | 'red_cards' | 'motm_awards' | 'matches_played'>) => {
-    const { error } = await supabase
-      .from('players')
-      .insert([playerData]);
-    
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('players')
+        .insert([playerData]);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Player added successfully",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error adding player:", error);
       toast({
         title: "Error",
         description: "Failed to add player",
@@ -252,21 +276,24 @@ export const useDatabase = () => {
       });
       return false;
     }
-    
-    toast({
-      title: "Success",
-      description: "Player added successfully",
-    });
-    return true;
   };
 
   const updatePlayer = async (id: string, updates: Partial<Player>) => {
-    const { error } = await supabase
-      .from('players')
-      .update(updates)
-      .eq('id', id);
-    
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('players')
+        .update(updates)
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Player updated successfully",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating player:", error);
       toast({
         title: "Error",
         description: "Failed to update player",
@@ -274,20 +301,23 @@ export const useDatabase = () => {
       });
       return false;
     }
-    
-    toast({
-      title: "Success",
-      description: "Player updated successfully",
-    });
-    return true;
   };
 
   const addGame = async (gameData: Omit<Game, 'id'>) => {
-    const { error } = await supabase
-      .from('games')
-      .insert([gameData]);
-    
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('games')
+        .insert([gameData]);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Game added successfully",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error adding game:", error);
       toast({
         title: "Error",
         description: "Failed to add game",
@@ -295,21 +325,24 @@ export const useDatabase = () => {
       });
       return false;
     }
-    
-    toast({
-      title: "Success",
-      description: "Game added successfully",
-    });
-    return true;
   };
 
   const updateGame = async (id: string, updates: Partial<Game>) => {
-    const { error } = await supabase
-      .from('games')
-      .update(updates)
-      .eq('id', id);
-    
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('games')
+        .update(updates)
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Game updated successfully. Team statistics will be recalculated automatically.",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error updating game:", error);
       toast({
         title: "Error",
         description: "Failed to update game",
@@ -317,20 +350,23 @@ export const useDatabase = () => {
       });
       return false;
     }
-    
-    toast({
-      title: "Success",
-      description: "Game updated successfully",
-    });
-    return true;
   };
 
   const addNews = async (newsData: Omit<NewsArticle, 'id' | 'published_at'>) => {
-    const { error } = await supabase
-      .from('news')
-      .insert([newsData]);
-    
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('news')
+        .insert([newsData]);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "News article added successfully",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error adding news:", error);
       toast({
         title: "Error",
         description: "Failed to add news article",
@@ -338,54 +374,100 @@ export const useDatabase = () => {
       });
       return false;
     }
-    
-    toast({
-      title: "Success",
-      description: "News article added successfully",
-    });
-    return true;
+  };
+
+  const validateImageFile = (file: File): string | null => {
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      return 'Please upload a valid image file (JPEG, PNG, GIF, or WebP)';
+    }
+
+    // Check file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      return 'File size must be less than 5MB';
+    }
+
+    return null;
   };
 
   const uploadTeamLogo = async (file: File) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `logo.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('team_logos')
-      .upload(fileName, file, { upsert: true });
-    
-    if (uploadError) {
+    try {
+      // Validate file
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        toast({
+          title: "Invalid File",
+          description: validationError,
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `logo-${Date.now()}.${fileExt}`;
+      
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
+        .from('team_logos')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data } = supabase.storage
+        .from('team_logos')
+        .getPublicUrl(fileName);
+      
+      // Update team branding
+      const { error: updateError } = await supabase
+        .from('team_branding')
+        .upsert({ 
+          id: teamBranding?.id || crypto.randomUUID(),
+          logo_url: data.publicUrl,
+          team_name: teamBranding?.team_name || 'GG Masters FC'
+        });
+      
+      if (updateError) throw updateError;
+      
       toast({
-        title: "Error",
-        description: "Failed to upload logo",
+        title: "Success",
+        description: "Team logo updated successfully",
+      });
+      return true;
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload team logo. Please try again.",
         variant: "destructive",
       });
       return false;
     }
-    
-    const { data } = supabase.storage
-      .from('team_logos')
-      .getPublicUrl(fileName);
-    
-    const { error: updateError } = await supabase
-      .from('team_branding')
-      .update({ logo_url: data.publicUrl })
-      .eq('id', teamBranding?.id);
-    
-    if (updateError) {
-      toast({
-        title: "Error",
-        description: "Failed to update logo URL",
-        variant: "destructive",
+  };
+
+  // Get recent completed matches for home page
+  const getRecentMatches = () => {
+    return games
+      .filter(game => game.status === 'completed' && game.home_score !== null && game.away_score !== null)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3)
+      .map(game => {
+        const ourScore = game.is_home ? game.home_score : game.away_score;
+        const theirScore = game.is_home ? game.away_score : game.home_score;
+        let result: 'W' | 'D' | 'L' = 'D';
+        
+        if (ourScore! > theirScore!) result = 'W';
+        else if (ourScore! < theirScore!) result = 'L';
+        
+        return {
+          ...game,
+          result,
+          ourScore,
+          theirScore
+        };
       });
-      return false;
-    }
-    
-    toast({
-      title: "Success",
-      description: "Team logo updated successfully",
-    });
-    return true;
   };
 
   const stats = {
@@ -415,6 +497,7 @@ export const useDatabase = () => {
     updateGame,
     addNews,
     uploadTeamLogo,
+    getRecentMatches,
     refetch: fetchAllData
   };
 };
