@@ -55,7 +55,12 @@ const GamesManager = () => {
   });
 
   const onAddGame = async (data: GameFormData) => {
-    const success = await addGame(data);
+    // Convert "none" back to null for motm_player_id
+    const gameData = {
+      ...data,
+      motm_player_id: data.motm_player_id === "none" ? null : data.motm_player_id
+    };
+    const success = await addGame(gameData);
     if (success) {
       setIsAddDialogOpen(false);
       addForm.reset();
@@ -64,7 +69,12 @@ const GamesManager = () => {
 
   const onEditGame = async (data: GameFormData) => {
     if (editingGame) {
-      const success = await updateGame(editingGame.id, data);
+      // Convert "none" back to null for motm_player_id
+      const gameData = {
+        ...data,
+        motm_player_id: data.motm_player_id === "none" ? null : data.motm_player_id
+      };
+      const success = await updateGame(editingGame.id, gameData);
       if (success) {
         setEditingGame(null);
         editForm.reset();
@@ -81,7 +91,8 @@ const GamesManager = () => {
     editForm.setValue("home_score", game.home_score);
     editForm.setValue("away_score", game.away_score);
     editForm.setValue("status", game.status);
-    editForm.setValue("motm_player_id", game.motm_player_id);
+    // Convert null to "none" for the select component
+    editForm.setValue("motm_player_id", game.motm_player_id || "none");
   };
 
   const getStatusColor = (status: string) => {
@@ -353,14 +364,14 @@ const GamesManager = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Man of the Match (Optional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select MOTM player" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           {players.map((player) => (
                             <SelectItem key={player.id} value={player.id}>
                               {player.name} - {player.position}
