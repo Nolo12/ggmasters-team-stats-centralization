@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Trophy, Users, Calendar, Newspaper c} from "lucide-react";
+import { Menu, Trophy, Users, Calendar, Newspaper } from "lucide-react";
 import { useDatabase } from "@/hooks/useDatabase";
 
 const Navigation = () => {
