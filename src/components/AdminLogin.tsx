@@ -44,7 +44,8 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   };
 
   const handleBackToHome = () => {
-    navigate("/");
+    console.log("Going back to home");
+    navigate("/news");
   };
 
   return (
