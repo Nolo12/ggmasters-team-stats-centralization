@@ -1,8 +1,14 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Trophy, Users, Calendar, Newspaper, Settings } from "lucide-react";
+import {
+  Menu,
+  Trophy,
+  Users,
+  Calendar,
+  Newspaper,
+  Settings,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
@@ -14,7 +20,6 @@ const Navigation = () => {
     { name: "Matches", href: "/matches", icon: Calendar },
     { name: "Players", href: "/players", icon: Users },
     { name: "News", href: "/news", icon: Newspaper },
-    { name: "Admin", href: "/admin", icon: Settings },
   ];
 
   const isActive = (href: string) => location.pathname === href;
@@ -28,7 +33,9 @@ const Navigation = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
               <Trophy className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">Thunder FC</span>
+            <span className="text-xl font-bold text-gray-900">
+              GG Masters FC
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

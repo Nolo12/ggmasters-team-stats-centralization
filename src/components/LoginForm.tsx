@@ -1,9 +1,15 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +23,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
-  
+
   const form = useForm<LoginFormData>({
     defaultValues: {
       email: "",
@@ -28,7 +34,7 @@ const LoginForm = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     const { error } = await login(data.email, data.password);
-    
+
     if (error) {
       toast({
         title: "Login Failed",
@@ -51,7 +57,9 @@ const LoginForm = () => {
           <CardTitle className="text-2xl font-bold text-gray-900">
             Admin Login
           </CardTitle>
-          <p className="text-gray-600">Access the Thunder FC admin dashboard</p>
+          <p className="text-gray-600">
+            Access the GG Masters FC admin dashboard
+          </p>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -90,11 +98,7 @@ const LoginForm = () => {
                   </FormItem>
                 )}
               />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
