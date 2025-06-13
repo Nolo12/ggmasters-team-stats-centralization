@@ -82,13 +82,13 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="msixty@ggmasters.com"
+                placeholder="Enter email"
                 required
                 className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
+              <Label htmlFor="Enter password" className="text-gray-300">
                 Password
               </Label>
               <div className="relative">
