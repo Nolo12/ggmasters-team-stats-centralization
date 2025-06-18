@@ -24,7 +24,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     setLoading(true);
 
     // Simple credential check
-    if (email === "msixty@ggmasters.com" && password === "password@123") {
+    if (email === "admin@ggmasters.com" && password === "password@123") {
       // Store session indicator
       localStorage.setItem("adminSession", "true");
 
